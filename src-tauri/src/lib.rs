@@ -11,6 +11,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_process::init())
         .manage(VaultState::new())
         .manage(ConfigState::new(config::AppConfig::default()))
         .invoke_handler(tauri::generate_handler![

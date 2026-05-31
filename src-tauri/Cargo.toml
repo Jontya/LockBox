@@ -30,3 +30,4 @@ uuid = { version = "1", features = ["v4"] }
 zeroize = "1"
 tauri-plugin-fs = "2"
 tauri-plugin-dialog = "2"
+tauri-plugin-process = "2"

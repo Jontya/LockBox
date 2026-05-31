@@ -10,7 +10,7 @@
     "opener:default",
     "fs:allow-read-file",
     "fs:allow-write-file",
-    "fs:allow-create-dir",
+    "fs:allow-mkdir",
     "fs:allow-exists",
     "fs:allow-rename",
     "fs:allow-app-write-recursive",
