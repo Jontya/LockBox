@@ -6,6 +6,7 @@ import { useVaultStore } from '../../store/vaultStore';
 import { tauriApi } from '../../lib/tauri';
 import { AppConfig } from '../../types/vault';
 import ChangePasswordModal from './ChangePasswordModal';
+import ImportModal from '../import/ImportModal';
 
 interface Props {
   onClose: () => void;
@@ -14,6 +15,7 @@ interface Props {
 export default function SettingsPanel({ onClose }: Props) {
   const { config, setConfig } = useVaultStore();
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showImport, setShowImport] = useState(false);
 
   if (!config) return null;
 
@@ -159,6 +161,22 @@ export default function SettingsPanel({ onClose }: Props) {
 
           <hr className="border-zinc-800 my-2" />
 
+          {/* Import */}
+          <div className="text-xs font-semibold text-zinc-400 uppercase tracking-wider px-4 py-2 mt-2">
+            Import
+          </div>
+
+          <div className="px-4 py-2">
+            <button
+              onClick={() => setShowImport(true)}
+              className="text-sm px-3 py-1.5 rounded bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
+            >
+              Import from .env or CSV
+            </button>
+          </div>
+
+          <hr className="border-zinc-800 my-2" />
+
           {/* Window */}
           <div className="text-xs font-semibold text-zinc-400 uppercase tracking-wider px-4 py-2 mt-2">
             Window
@@ -195,6 +213,10 @@ export default function SettingsPanel({ onClose }: Props) {
 
       {showChangePassword && (
         <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
+      )}
+
+      {showImport && (
+        <ImportModal onClose={() => setShowImport(false)} />
       )}
     </>
   );
