@@ -15,21 +15,21 @@ export default function TitleBar() {
       </span>
       <div className="flex items-center">
         <button
-          onClick={() => appWindow.minimize()}
+          onMouseDown={e => e.stopPropagation()} onClick={() => appWindow.minimize()}
           className="flex items-center justify-center w-11 h-9 text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors duration-100"
           aria-label="Minimise"
         >
           <Minus size={13} />
         </button>
         <button
-          onClick={() => appWindow.toggleMaximize()}
+          onMouseDown={e => e.stopPropagation()} onClick={() => appWindow.toggleMaximize()}
           className="flex items-center justify-center w-11 h-9 text-zinc-500 hover:text-zinc-100 hover:bg-zinc-800 transition-colors duration-100"
           aria-label="Maximise"
         >
           <Square size={11} />
         </button>
         <button
-          onClick={() => appWindow.close()}
+          onMouseDown={e => e.stopPropagation()} onClick={() => appWindow.close()}
           className="flex items-center justify-center w-11 h-9 text-zinc-500 hover:text-white hover:bg-red-600 transition-colors duration-100"
           aria-label="Close"
         >
