@@ -99,7 +99,7 @@ export default function EntryList({ onAddEntry: _onAddEntry }: Props) {
           <option value="az">A → Z</option>
           <option value="za">Z → A</option>
         </select>
-        <button className="btn-primary btn-sm flex-shrink-0" onClick={() => setShowAdd(true)}>
+        <button className="btn-primary flex-shrink-0 !text-xs !px-3" onClick={() => setShowAdd(true)}>
           <Plus size={13} />
           Add
         </button>
