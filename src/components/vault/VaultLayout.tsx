@@ -5,6 +5,7 @@ import BucketPanel from './BucketPanel';
 import EntryList from './EntryList';
 import { useVaultStore } from '../../store/vaultStore';
 import { tauriApi } from '../../lib/tauri';
+import GlobalSearchOverlay from './GlobalSearchOverlay';
 
 export default function VaultLayout() {
   const { config, setAppState, setVaultData, setWasAutoLocked } = useVaultStore();
@@ -62,7 +63,7 @@ export default function VaultLayout() {
   return (
     <div className="flex flex-col h-screen bg-zinc-900">
       <TopBar
-        onSearchOpen={() => { setShowSearch(true); console.log('search open'); }}
+        onSearchOpen={() => setShowSearch(true)}
         onSettingsOpen={() => { setShowSettings(true); console.log('settings open'); }}
         onLock={() => handleLock(false)}
       />
@@ -74,7 +75,7 @@ export default function VaultLayout() {
           <EntryList onAddEntry={() => { /* Step 10 will wire this */ }} />
         </div>
       </div>
-      {showSearch && null}
+      {showSearch && <GlobalSearchOverlay onClose={() => setShowSearch(false)} />}
       {showSettings && null}
     </div>
   );
