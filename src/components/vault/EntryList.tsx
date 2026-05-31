@@ -3,6 +3,9 @@ import { Plus } from 'lucide-react';
 import { useVaultStore } from '../../store/vaultStore';
 import type { VaultEntry } from '../../types/vault';
 import EntryCard from './EntryCard';
+import EntryDetailModal from './EntryDetailModal';
+import AddEditEntryModal from './AddEditEntryModal';
+import ConfirmDeleteEntryModal from './ConfirmDeleteEntryModal';
 
 interface Props {
   onAddEntry: () => void;
@@ -20,10 +23,14 @@ function sortEntries(entries: VaultEntry[], sort: string): VaultEntry[] {
   });
 }
 
-export default function EntryList({ onAddEntry }: Props) {
+export default function EntryList({ onAddEntry: _onAddEntry }: Props) {
   const { vaultData, selectedBucketId } = useVaultStore();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('newest');
+  const [selectedEntry, setSelectedEntry] = useState<VaultEntry | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
 
   const buckets = vaultData?.buckets ?? [];
 
@@ -49,7 +56,7 @@ export default function EntryList({ onAddEntry }: Props) {
       const entries = filterEntries(selectedBucket.entries);
       if (entries.length === 0) return renderEmptyState(search.length > 0);
       return entries.map(entry => (
-        <EntryCard key={entry.id} entry={entry} onClick={() => {}} />
+        <EntryCard key={entry.id} entry={entry} onClick={() => setSelectedEntry(entry)} />
       ));
     }
 
@@ -71,7 +78,7 @@ export default function EntryList({ onAddEntry }: Props) {
           {entries.length === 0
             ? renderEmptyState(search.length > 0)
             : entries.map(entry => (
-                <EntryCard key={entry.id} entry={entry} onClick={() => {}} />
+                <EntryCard key={entry.id} entry={entry} onClick={() => setSelectedEntry(entry)} />
               ))}
         </div>
       );
@@ -99,7 +106,7 @@ export default function EntryList({ onAddEntry }: Props) {
         </select>
         <button
           className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-3 py-1.5 rounded-md font-medium flex items-center gap-1.5"
-          onClick={onAddEntry}
+          onClick={() => setShowAdd(true)}
         >
           <Plus className="w-4 h-4" />
           Add Entry
@@ -108,6 +115,33 @@ export default function EntryList({ onAddEntry }: Props) {
       <div className="flex-1 overflow-y-auto py-2 px-3 flex flex-col gap-1">
         {renderEntries()}
       </div>
+
+      {selectedEntry && !showEdit && !showDelete && (
+        <EntryDetailModal
+          entry={selectedEntry}
+          onClose={() => setSelectedEntry(null)}
+          onEdit={() => setShowEdit(true)}
+          onDelete={() => setShowDelete(true)}
+        />
+      )}
+      {showAdd && (
+        <AddEditEntryModal
+          bucketId={selectedBucketId ?? undefined}
+          onClose={() => setShowAdd(false)}
+        />
+      )}
+      {showEdit && selectedEntry && (
+        <AddEditEntryModal
+          entry={selectedEntry}
+          onClose={() => { setShowEdit(false); setSelectedEntry(null); }}
+        />
+      )}
+      {showDelete && selectedEntry && (
+        <ConfirmDeleteEntryModal
+          entry={selectedEntry}
+          onClose={() => { setShowDelete(false); setSelectedEntry(null); }}
+        />
+      )}
     </div>
   );
 }
