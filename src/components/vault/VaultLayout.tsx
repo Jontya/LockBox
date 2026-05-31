@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import TopBar from './TopBar';
 import BucketPanel from './BucketPanel';
+import EntryList from './EntryList';
 import { useVaultStore } from '../../store/vaultStore';
 import { tauriApi } from '../../lib/tauri';
 
@@ -69,8 +70,8 @@ export default function VaultLayout() {
         <div className="w-60 flex-shrink-0">
           <BucketPanel />
         </div>
-        <div className="flex flex-1 flex-col bg-zinc-900 items-center justify-center">
-          <span className="text-zinc-500 text-sm">Entry list (Step 9)</span>
+        <div className="flex flex-1 flex-col bg-zinc-900 overflow-hidden">
+          <EntryList onAddEntry={() => { /* Step 10 will wire this */ }} />
         </div>
       </div>
       {showSearch && null}
