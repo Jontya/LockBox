@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { tauriApi } from '../../lib/tauri';
+import { useFocusTrap } from '../../lib/useFocusTrap';
 
 interface Props {
   onClose: () => void;
@@ -23,6 +24,9 @@ export default function ChangePasswordModal({ onClose }: Props) {
   const [newPass, setNewPass] = useState('');
   const [confirm, setConfirm] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(cardRef);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -50,7 +54,7 @@ export default function ChangePasswordModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center">
-      <div className="bg-zinc-900 border border-zinc-700 rounded-lg w-80 p-4 flex flex-col gap-3">
+      <div ref={cardRef} className="bg-zinc-900 border border-zinc-700 rounded-lg w-80 p-4 flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-semibold text-zinc-100">Change Password</span>
           <button onClick={onClose} className="text-zinc-400 hover:text-zinc-100">
@@ -110,7 +114,7 @@ export default function ChangePasswordModal({ onClose }: Props) {
             disabled={submitting}
             className="text-sm px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
           >
-            Save
+            {submitting ? 'Saving...' : 'Save'}
           </button>
         </div>
       </div>

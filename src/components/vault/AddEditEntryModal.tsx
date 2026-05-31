@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { VaultEntry, VaultEntryType } from '../../types/vault';
 import { useVaultStore } from '../../store/vaultStore';
 import { tauriApi } from '../../lib/tauri';
+import { useFocusTrap } from '../../lib/useFocusTrap';
 
 interface Props {
   entry?: VaultEntry;
@@ -13,6 +15,7 @@ interface Props {
 export default function AddEditEntryModal({ entry, bucketId, onClose }: Props) {
   const { vaultData, setVaultData } = useVaultStore();
   const isEdit = !!entry;
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const [type, setType] = useState<VaultEntryType>(entry?.type ?? 'api_key');
   const [label, setLabel] = useState(entry?.label ?? '');
@@ -27,6 +30,9 @@ export default function AddEditEntryModal({ entry, bucketId, onClose }: Props) {
   );
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  useFocusTrap(cardRef);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -48,31 +54,37 @@ export default function AddEditEntryModal({ entry, bucketId, onClose }: Props) {
 
   const handleSubmit = async () => {
     if (!validate() || !vaultData) return;
+    setIsLoading(true);
+    try {
+      const newData = { ...vaultData, buckets: vaultData.buckets.map(b => ({ ...b, entries: [...b.entries] })) };
 
-    const newData = { ...vaultData, buckets: vaultData.buckets.map(b => ({ ...b, entries: [...b.entries] })) };
-
-    if (isEdit) {
-      for (const bucket of newData.buckets) {
-        const idx = bucket.entries.findIndex(e => e.id === entry!.id);
-        if (idx !== -1) {
-          const updated: VaultEntry = type === 'api_key'
-            ? { ...entry as Extract<VaultEntry, { type: 'api_key' }>, label, value, notes }
-            : { ...entry as Extract<VaultEntry, { type: 'account' }>, label, username, password, notes };
-          bucket.entries[idx] = updated;
-          break;
+      if (isEdit) {
+        for (const bucket of newData.buckets) {
+          const idx = bucket.entries.findIndex(e => e.id === entry!.id);
+          if (idx !== -1) {
+            const updated: VaultEntry = type === 'api_key'
+              ? { ...entry as Extract<VaultEntry, { type: 'api_key' }>, label, value, notes }
+              : { ...entry as Extract<VaultEntry, { type: 'account' }>, label, username, password, notes };
+            bucket.entries[idx] = updated;
+            break;
+          }
         }
+      } else {
+        const newEntry: VaultEntry = type === 'api_key'
+          ? { type: 'api_key', id: crypto.randomUUID(), label, value, notes, created_at: new Date().toISOString(), archived: false }
+          : { type: 'account', id: crypto.randomUUID(), label, username, password, notes, created_at: new Date().toISOString(), archived: false };
+        const targetBucket = newData.buckets.find(b => b.id === selectedBucketId);
+        if (targetBucket) targetBucket.entries.push(newEntry);
       }
-    } else {
-      const newEntry: VaultEntry = type === 'api_key'
-        ? { type: 'api_key', id: crypto.randomUUID(), label, value, notes, created_at: new Date().toISOString(), archived: false }
-        : { type: 'account', id: crypto.randomUUID(), label, username, password, notes, created_at: new Date().toISOString(), archived: false };
-      const targetBucket = newData.buckets.find(b => b.id === selectedBucketId);
-      if (targetBucket) targetBucket.entries.push(newEntry);
-    }
 
-    setVaultData(newData);
-    await tauriApi.saveVaultData(newData);
-    onClose();
+      setVaultData(newData);
+      await tauriApi.saveVaultData(newData);
+      onClose();
+    } catch (err) {
+      toast.error(String(err));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const fieldClass = (err?: string) =>
@@ -80,7 +92,7 @@ export default function AddEditEntryModal({ entry, bucketId, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-zinc-800 rounded-lg p-6 max-w-md w-full shadow-xl">
+      <div ref={cardRef} className="bg-zinc-800 rounded-lg p-6 max-w-md w-full shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <span className="text-lg font-medium text-zinc-100">{isEdit ? 'Edit Entry' : 'Add Entry'}</span>
           <button className="text-zinc-400 hover:text-zinc-100" onClick={onClose}>
@@ -174,14 +186,16 @@ export default function AddEditEntryModal({ entry, bucketId, onClose }: Props) {
           <button
             className="flex-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-100 text-sm px-4 py-2 rounded-md"
             onClick={onClose}
+            disabled={isLoading}
           >
             Cancel
           </button>
           <button
-            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-2 rounded-md"
+            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-2 rounded-md disabled:opacity-50"
             onClick={handleSubmit}
+            disabled={isLoading}
           >
-            {isEdit ? 'Save' : 'Add'}
+            {isLoading ? 'Saving...' : (isEdit ? 'Save' : 'Add')}
           </button>
         </div>
       </div>

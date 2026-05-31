@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { BUCKET_COLORS } from '../../lib/bucketColors';
 import { tauriApi } from '../../lib/tauri';
 import { useVaultStore } from '../../store/vaultStore';
 import type { Bucket } from '../../types/vault';
+import { useFocusTrap } from '../../lib/useFocusTrap';
 
 interface Props {
   onClose: () => void;
@@ -11,8 +12,11 @@ interface Props {
 
 export default function CreateBucketModal({ onClose }: Props) {
   const { vaultData, setVaultData } = useVaultStore();
+  const cardRef = useRef<HTMLDivElement>(null);
   const [name, setName] = useState('');
   const [colorId, setColorId] = useState('blue');
+
+  useFocusTrap(cardRef);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -43,10 +47,9 @@ export default function CreateBucketModal({ onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-zinc-800 rounded-lg p-6 max-w-sm w-full shadow-xl">
+      <div ref={cardRef} className="bg-zinc-800 rounded-lg p-6 max-w-sm w-full shadow-xl">
         <h2 className="text-zinc-100 font-semibold mb-4">New Bucket</h2>
         <input
-          autoFocus
           type="text"
           placeholder="Bucket name"
           value={name}

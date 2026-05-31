@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Eye, EyeOff, Copy } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { VaultEntry } from '../../types/vault';
 import { useVaultStore } from '../../store/vaultStore';
 import { copyToClipboard } from '../../lib/clipboard';
+import { useFocusTrap } from '../../lib/useFocusTrap';
 
 interface Props {
   entry: VaultEntry;
@@ -18,8 +19,11 @@ export default function EntryDetailModal({ entry, onClose, onEdit, onDelete }: P
   const { config } = useVaultStore();
   const clearMs = (config?.clipboard_clear_seconds ?? 60) * 1000;
   const clearSecs = config?.clipboard_clear_seconds ?? 60;
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
+
+  useFocusTrap(cardRef);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -69,7 +73,7 @@ export default function EntryDetailModal({ entry, onClose, onEdit, onDelete }: P
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-zinc-800 rounded-lg p-6 max-w-md w-full shadow-xl">
+      <div ref={cardRef} className="bg-zinc-800 rounded-lg p-6 max-w-md w-full shadow-xl">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-lg font-medium text-zinc-100">{entry.label}</span>
