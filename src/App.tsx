@@ -1,51 +1,54 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
+import { useVaultStore } from './store/vaultStore';
+import { tauriApi } from './lib/tauri';
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+export default function App() {
+  const { appState, setAppState, setConfig } = useVaultStore();
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+  useEffect(() => {
+    async function init() {
+      try {
+        const [exists, config] = await Promise.all([
+          tauriApi.vaultExists(),
+          tauriApi.getConfig(),
+        ]);
+        setConfig(config);
+        setAppState(exists ? 'locked' : 'setup');
+      } catch (err) {
+        console.error('Init error:', err);
+        setAppState('setup');
+      }
+    }
+    init();
+  }, [setAppState, setConfig]);
+
+  if (appState === 'loading') {
+    return (
+      <div className="flex h-screen items-center justify-center bg-zinc-900">
+        <div className="text-zinc-400 text-sm">Loading...</div>
+      </div>
+    );
   }
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+    <div className="flex h-screen bg-zinc-900 text-zinc-100">
+      <Toaster position="bottom-right" toastOptions={{ style: { background: '#27272a', color: '#f4f4f5', border: '1px solid #3f3f46' } }} />
+      {appState === 'setup' && (
+        <div className="flex flex-1 items-center justify-center">
+          <p className="text-zinc-400">Setup flow — coming in Step 5</p>
+        </div>
+      )}
+      {appState === 'locked' && (
+        <div className="flex flex-1 items-center justify-center">
+          <p className="text-zinc-400">Unlock screen — coming in Step 6</p>
+        </div>
+      )}
+      {appState === 'unlocked' && (
+        <div className="flex flex-1 items-center justify-center">
+          <p className="text-zinc-400">Main vault — coming in Step 7</p>
+        </div>
+      )}
+    </div>
   );
 }
-
-export default App;
