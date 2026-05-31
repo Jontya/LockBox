@@ -7,7 +7,7 @@ Current session: 1
 ## Steps
 
 [DONE] Step 1: Project scaffold, .gitignore, .claude setup, git init
-[PENDING] Step 2: Rust core — vault structs, crypto primitives, config, state, unit tests
+[DONE] Step 2: Rust core — vault structs, crypto primitives, config, state, unit tests
 [PENDING] Step 3: Tauri commands — commands.rs, register in main.rs
 [PENDING] Step 4: Frontend shell — Zustand store, App.tsx routing, typed invoke wrappers, clipboard lib, types
 [PENDING] Step 5: Setup flow UI — SetupFlow, WelcomeStep, CreatePasswordStep, BackupStep, CompleteStep
