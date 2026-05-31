@@ -5,10 +5,7 @@ import { useVaultStore } from '../../store/vaultStore';
 import { tauriApi } from '../../lib/tauri';
 import { useFocusTrap } from '../../lib/useFocusTrap';
 
-interface Props {
-  entry: VaultEntry;
-  onClose: () => void;
-}
+interface Props { entry: VaultEntry; onClose: () => void; }
 
 export default function ConfirmDeleteEntryModal({ entry, onClose }: Props) {
   const { vaultData, setVaultData } = useVaultStore();
@@ -16,7 +13,6 @@ export default function ConfirmDeleteEntryModal({ entry, onClose }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   useFocusTrap(cardRef);
-
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
@@ -29,10 +25,7 @@ export default function ConfirmDeleteEntryModal({ entry, onClose }: Props) {
     try {
       const newData = {
         ...vaultData,
-        buckets: vaultData.buckets.map(b => ({
-          ...b,
-          entries: b.entries.filter(e => e.id !== entry.id),
-        })),
+        buckets: vaultData.buckets.map(b => ({ ...b, entries: b.entries.filter(e => e.id !== entry.id) })),
       };
       setVaultData(newData);
       await tauriApi.saveVaultData(newData);
@@ -45,24 +38,16 @@ export default function ConfirmDeleteEntryModal({ entry, onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div ref={cardRef} className="bg-zinc-800 rounded-lg p-6 max-w-sm w-full shadow-xl">
-        <h2 className="text-lg font-medium text-zinc-100 mb-2">Delete '{entry.label}'?</h2>
-        <p className="text-sm text-zinc-400 mb-6">This action cannot be undone.</p>
+    <div className="modal-backdrop">
+      <div ref={cardRef} className="modal-box max-w-sm">
+        <h2 className="text-base font-semibold text-zinc-100 mb-1.5">Delete entry?</h2>
+        <p className="text-sm text-zinc-400 mb-5">
+          <span className="text-zinc-300">"{entry.label}"</span> will be permanently removed.
+        </p>
         <div className="flex gap-2">
-          <button
-            className="flex-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-100 text-sm px-4 py-2 rounded-md"
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
-          <button
-            className="flex-1 bg-red-600 hover:bg-red-500 text-white text-sm px-4 py-2 rounded-md disabled:opacity-50"
-            onClick={handleDelete}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Deleting...' : 'Delete'}
+          <button className="btn-ghost flex-1" onClick={onClose} disabled={isLoading}>Cancel</button>
+          <button className="btn-destructive flex-1" onClick={handleDelete} disabled={isLoading}>
+            {isLoading ? 'Deleting…' : 'Delete Entry'}
           </button>
         </div>
       </div>

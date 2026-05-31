@@ -23,6 +23,12 @@ function sortEntries(entries: VaultEntry[], sort: string): VaultEntry[] {
   });
 }
 
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="text-zinc-600 text-sm text-center py-10">{message}</div>
+  );
+}
+
 export default function EntryList({ onAddEntry: _onAddEntry }: Props) {
   const { vaultData, selectedBucketId } = useVaultStore();
   const [search, setSearch] = useState('');
@@ -41,42 +47,28 @@ export default function EntryList({ onAddEntry: _onAddEntry }: Props) {
     return sortEntries(filtered, sort);
   };
 
-  const selectedBucket = selectedBucketId
-    ? buckets.find(b => b.id === selectedBucketId)
-    : null;
-
-  const renderEmptyState = (hasSearch: boolean) => (
-    <div className="text-zinc-500 text-sm text-center py-8">
-      {hasSearch ? 'No entries match your search.' : 'No entries. Add one with the button above.'}
-    </div>
-  );
+  const selectedBucket = selectedBucketId ? buckets.find(b => b.id === selectedBucketId) : null;
 
   const renderEntries = () => {
     if (selectedBucket) {
       const entries = filterEntries(selectedBucket.entries);
-      if (entries.length === 0) return renderEmptyState(search.length > 0);
+      if (entries.length === 0) return <EmptyState message={search ? 'No entries match your search.' : 'No entries. Add one above.'} />;
       return entries.map(entry => (
         <EntryCard key={entry.id} entry={entry} onClick={() => setSelectedEntry(entry)} />
       ));
     }
 
-    if (buckets.length === 0) {
-      return (
-        <div className="text-zinc-500 text-sm text-center py-8">
-          Create a bucket to get started.
-        </div>
-      );
-    }
+    if (buckets.length === 0) return <EmptyState message="Create a bucket to get started." />;
 
     return buckets.map((bucket, idx) => {
       const entries = filterEntries(bucket.entries);
       return (
         <div key={bucket.id}>
-          <div className={`text-xs font-semibold text-zinc-500 uppercase tracking-wider px-2 py-1.5 ${idx === 0 ? 'mt-0' : 'mt-2'}`}>
+          <div className={`text-xs font-medium text-zinc-500 px-2 py-1.5 ${idx === 0 ? '' : 'mt-3'}`}>
             {bucket.name}
           </div>
           {entries.length === 0
-            ? renderEmptyState(search.length > 0)
+            ? <EmptyState message={search ? 'No entries match.' : 'No entries yet.'} />
             : entries.map(entry => (
                 <EntryCard key={entry.id} entry={entry} onClick={() => setSelectedEntry(entry)} />
               ))}
@@ -87,32 +79,32 @@ export default function EntryList({ onAddEntry: _onAddEntry }: Props) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-800">
+      {/* Toolbar */}
+      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-zinc-800">
         <input
-          className="flex-1 bg-zinc-800 border border-zinc-600 rounded-md px-3 py-1.5 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          placeholder="Search entries..."
+          className="field flex-1"
+          placeholder="Search entries…"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
         <select
-          className="bg-zinc-800 border border-zinc-600 rounded-md px-2 py-1.5 text-sm text-zinc-300"
+          className="field !w-auto cursor-pointer"
           value={sort}
           onChange={e => setSort(e.target.value)}
         >
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
           <option value="az">A → Z</option>
           <option value="za">Z → A</option>
         </select>
-        <button
-          className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-3 py-1.5 rounded-md font-medium flex items-center gap-1.5"
-          onClick={() => setShowAdd(true)}
-        >
-          <Plus className="w-4 h-4" />
-          Add Entry
+        <button className="btn-primary btn-sm flex-shrink-0" onClick={() => setShowAdd(true)}>
+          <Plus size={13} />
+          Add
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto py-2 px-3 flex flex-col gap-1">
+
+      {/* Entry list */}
+      <div className="flex-1 overflow-y-auto py-1.5 px-2">
         {renderEntries()}
       </div>
 
@@ -125,10 +117,7 @@ export default function EntryList({ onAddEntry: _onAddEntry }: Props) {
         />
       )}
       {showAdd && (
-        <AddEditEntryModal
-          bucketId={selectedBucketId ?? undefined}
-          onClose={() => setShowAdd(false)}
-        />
+        <AddEditEntryModal bucketId={selectedBucketId ?? undefined} onClose={() => setShowAdd(false)} />
       )}
       {showEdit && selectedEntry && (
         <AddEditEntryModal

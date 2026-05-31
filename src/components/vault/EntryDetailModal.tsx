@@ -20,7 +20,6 @@ export default function EntryDetailModal({ entry, onClose, onEdit, onDelete }: P
   const clearMs = (config?.clipboard_clear_seconds ?? 60) * 1000;
   const clearSecs = config?.clipboard_clear_seconds ?? 60;
   const cardRef = useRef<HTMLDivElement>(null);
-
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
 
   useFocusTrap(cardRef);
@@ -48,23 +47,17 @@ export default function EntryDetailModal({ entry, onClose, onEdit, onDelete }: P
     const isRevealed = revealed.has(fieldKey);
     const display = masked && !isRevealed ? MASK : value;
     return (
-      <div className="mb-4">
-        <div className="text-xs text-zinc-500 mb-1">{label}</div>
-        <div className="flex items-center gap-2 bg-zinc-700/50 rounded-md px-3 py-2">
+      <div className="flex flex-col gap-1.5 mb-4">
+        <span className="text-xs font-medium text-zinc-500">{label}</span>
+        <div className="flex items-center gap-1 bg-zinc-700/50 rounded-md px-3 py-2">
           <span className="flex-1 text-sm text-zinc-100 font-mono break-all">{display}</span>
           {masked && (
-            <button
-              className="text-zinc-400 hover:text-zinc-100"
-              onClick={() => toggleReveal(fieldKey)}
-            >
-              {isRevealed ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            <button className="icon-btn w-6 h-6 flex-shrink-0" onClick={() => toggleReveal(fieldKey)}>
+              {isRevealed ? <EyeOff size={13} /> : <Eye size={13} />}
             </button>
           )}
-          <button
-            className="text-zinc-400 hover:text-zinc-100"
-            onClick={() => handleCopy(value)}
-          >
-            <Copy className="w-4 h-4" />
+          <button className="icon-btn w-6 h-6 flex-shrink-0" onClick={() => handleCopy(value)}>
+            <Copy size={13} />
           </button>
         </div>
       </div>
@@ -72,56 +65,37 @@ export default function EntryDetailModal({ entry, onClose, onEdit, onDelete }: P
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div ref={cardRef} className="bg-zinc-800 rounded-lg p-6 max-w-md w-full shadow-xl">
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-lg font-medium text-zinc-100">{entry.label}</span>
-            <span className="text-xs bg-zinc-700 text-zinc-300 px-2 py-0.5 rounded">
+    <div className="modal-backdrop">
+      <div ref={cardRef} className="modal-box max-w-md">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-5">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            <span className="text-base font-semibold text-zinc-100 truncate">{entry.label}</span>
+            <span className="text-xs bg-zinc-700 text-zinc-400 px-2 py-0.5 rounded flex-shrink-0">
               {entry.type === 'api_key' ? 'API Key' : 'Account'}
             </span>
           </div>
-          <button className="text-zinc-400 hover:text-zinc-100 ml-2" onClick={onClose}>
-            <X className="w-5 h-5" />
+          <button className="icon-btn flex-shrink-0 ml-2" onClick={onClose} aria-label="Close">
+            <X size={15} />
           </button>
         </div>
 
         {entry.type === 'api_key' ? (
           <>
             {renderField('API Key', entry.value, 'value', true)}
-            {entry.notes && (
-              <div className="mb-4">
-                <div className="text-xs text-zinc-500 mb-1">Notes</div>
-                <div className="bg-zinc-700/50 rounded-md px-3 py-2 text-sm text-zinc-300 whitespace-pre-wrap">{entry.notes}</div>
-              </div>
-            )}
+            {entry.notes && renderField('Notes', entry.notes, 'notes', false)}
           </>
         ) : (
           <>
             {renderField('Username', entry.username, 'username', false)}
             {renderField('Password', entry.password, 'password', true)}
-            {entry.notes && (
-              <div className="mb-4">
-                <div className="text-xs text-zinc-500 mb-1">Notes</div>
-                <div className="bg-zinc-700/50 rounded-md px-3 py-2 text-sm text-zinc-300 whitespace-pre-wrap">{entry.notes}</div>
-              </div>
-            )}
+            {entry.notes && renderField('Notes', entry.notes, 'notes', false)}
           </>
         )}
 
-        <div className="flex gap-2 mt-2">
-          <button
-            className="flex-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-100 text-sm px-4 py-2 rounded-md"
-            onClick={onEdit}
-          >
-            Edit
-          </button>
-          <button
-            className="flex-1 bg-red-600 hover:bg-red-500 text-white text-sm px-4 py-2 rounded-md"
-            onClick={onDelete}
-          >
-            Delete
-          </button>
+        <div className="flex gap-2 pt-1">
+          <button className="btn-subtle flex-1" onClick={onEdit}>Edit</button>
+          <button className="btn-destructive flex-1" onClick={onDelete}>Delete</button>
         </div>
       </div>
     </div>

@@ -13,9 +13,7 @@ export default function BackupStep({ onNext }: Props) {
 
   async function chooseFolder() {
     const result = await open({ directory: true, multiple: false });
-    if (typeof result === 'string') {
-      setSelectedPath(result);
-    }
+    if (typeof result === 'string') setSelectedPath(result);
   }
 
   async function handleContinue() {
@@ -33,37 +31,29 @@ export default function BackupStep({ onNext }: Props) {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-medium text-zinc-100">Set a backup location</h2>
-        <p className="text-sm text-zinc-400">
-          LockBox can automatically back up your vault to a folder of your choice.
+      <div>
+        <h2 className="text-lg font-semibold text-zinc-100 tracking-tight">Set a backup location</h2>
+        <p className="text-sm text-zinc-500 mt-1">
+          LockBox can automatically copy your encrypted vault to a folder you choose.
         </p>
       </div>
 
-      <button
-        onClick={chooseFolder}
-        className="px-4 py-2 rounded-md text-sm font-medium bg-zinc-700 hover:bg-zinc-600 text-zinc-100 w-fit"
-      >
+      <button onClick={chooseFolder} className="btn-subtle w-fit">
         Choose Folder
       </button>
 
       {selectedPath && (
-        <p className="text-sm text-zinc-300 break-all">{selectedPath}</p>
+        <p className="text-xs text-zinc-400 font-mono break-all bg-zinc-700/40 rounded px-3 py-2">
+          {selectedPath}
+        </p>
       )}
 
       <div className="flex gap-3">
-        <button
-          onClick={onNext}
-          className="px-4 py-2 rounded-md text-sm font-medium bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
-        >
-          Skip for Now
+        <button onClick={onNext} className="btn-ghost">
+          Skip for now
         </button>
         {selectedPath && (
-          <button
-            onClick={handleContinue}
-            disabled={loading}
-            className="px-4 py-2 rounded-md text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
-          >
+          <button onClick={handleContinue} disabled={loading} className="btn-primary">
             {loading ? 'Saving…' : 'Continue'}
           </button>
         )}

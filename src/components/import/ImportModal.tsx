@@ -7,22 +7,19 @@ import { tauriApi } from '../../lib/tauri';
 import { useVaultStore } from '../../store/vaultStore';
 import type { ParsedEntry, CsvParseResult, ApiKeyEntry, AccountEntry } from '../../types/vault';
 
-interface Props {
-  onClose: () => void;
-}
-
+interface Props { onClose: () => void; }
 type Tab = 'env' | 'csv';
 type EntryType = 'api_key' | 'account';
+
+const colSelect = 'bg-zinc-700 border border-zinc-600 rounded-md text-sm text-zinc-100 px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 w-full';
 
 export default function ImportModal({ onClose }: Props) {
   const { vaultData, setVaultData } = useVaultStore();
   const [tab, setTab] = useState<Tab>('env');
 
-  // ENV state
   const [envEntries, setEnvEntries] = useState<ParsedEntry[]>([]);
   const [envBucketId, setEnvBucketId] = useState<string>('');
 
-  // CSV state
   const [csvResult, setCsvResult] = useState<CsvParseResult | null>(null);
   const [csvRaw, setCsvRaw] = useState<string>('');
   const [csvBucketId, setCsvBucketId] = useState<string>('');
@@ -38,7 +35,6 @@ export default function ImportModal({ onClose }: Props) {
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
-  // Set default bucket when vaultData loads
   useEffect(() => {
     if (vaultData?.buckets.length) {
       const first = vaultData.buckets[0].id;
@@ -58,20 +54,11 @@ export default function ImportModal({ onClose }: Props) {
   const handleImportEnv = async () => {
     if (!vaultData || !envBucketId || envEntries.length === 0) return;
     const newEntries: ApiKeyEntry[] = envEntries.map(e => ({
-      type: 'api_key',
-      id: crypto.randomUUID(),
-      label: e.label,
-      value: e.value,
-      notes: '',
-      created_at: new Date().toISOString(),
-      archived: false,
+      type: 'api_key', id: crypto.randomUUID(), label: e.label, value: e.value,
+      notes: '', created_at: new Date().toISOString(), archived: false,
     }));
-    const updated = {
-      ...vaultData,
-      buckets: vaultData.buckets.map(b =>
-        b.id === envBucketId ? { ...b, entries: [...b.entries, ...newEntries] } : b
-      ),
-    };
+    const updated = { ...vaultData, buckets: vaultData.buckets.map(b =>
+      b.id === envBucketId ? { ...b, entries: [...b.entries, ...newEntries] } : b) };
     setVaultData(updated);
     await tauriApi.saveVaultData(updated);
     toast.success(`Imported ${newEntries.length} entries`);
@@ -98,7 +85,6 @@ export default function ImportModal({ onClose }: Props) {
     const valueIdx = headers.indexOf(csvValueCol);
     const usernameIdx = csvUsernameCol ? headers.indexOf(csvUsernameCol) : -1;
     const notesIdx = csvNotesCol ? headers.indexOf(csvNotesCol) : -1;
-
     const newEntries: Array<ApiKeyEntry | AccountEntry> = dataRows
       .filter(row => row.length > Math.max(labelIdx, valueIdx))
       .map(row => {
@@ -107,37 +93,12 @@ export default function ImportModal({ onClose }: Props) {
         const notes = notesIdx >= 0 ? (row[notesIdx] ?? '') : '';
         if (csvEntryType === 'account') {
           const username = usernameIdx >= 0 ? (row[usernameIdx] ?? '') : '';
-          const entry: AccountEntry = {
-            type: 'account',
-            id: crypto.randomUUID(),
-            label,
-            username,
-            password: value,
-            notes,
-            created_at: new Date().toISOString(),
-            archived: false,
-          };
-          return entry;
-        } else {
-          const entry: ApiKeyEntry = {
-            type: 'api_key',
-            id: crypto.randomUUID(),
-            label,
-            value,
-            notes,
-            created_at: new Date().toISOString(),
-            archived: false,
-          };
-          return entry;
+          return { type: 'account', id: crypto.randomUUID(), label, username, password: value, notes, created_at: new Date().toISOString(), archived: false } as AccountEntry;
         }
+        return { type: 'api_key', id: crypto.randomUUID(), label, value, notes, created_at: new Date().toISOString(), archived: false } as ApiKeyEntry;
       });
-
-    const updated = {
-      ...vaultData,
-      buckets: vaultData.buckets.map(b =>
-        b.id === csvBucketId ? { ...b, entries: [...b.entries, ...newEntries] } : b
-      ),
-    };
+    const updated = { ...vaultData, buckets: vaultData.buckets.map(b =>
+      b.id === csvBucketId ? { ...b, entries: [...b.entries, ...newEntries] } : b) };
     setVaultData(updated);
     await tauriApi.saveVaultData(updated);
     toast.success(`Imported ${newEntries.length} entries`);
@@ -147,74 +108,52 @@ export default function ImportModal({ onClose }: Props) {
   const buckets = vaultData?.buckets ?? [];
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-zinc-800 rounded-lg shadow-xl w-full max-w-xl mx-4 flex flex-col max-h-[80vh]">
+    <div className="modal-backdrop">
+      <div className="modal-box max-w-xl flex flex-col max-h-[80vh] !p-0 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700">
           <span className="text-sm font-semibold text-zinc-100">Import</span>
-          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-100">
-            <X size={16} />
-          </button>
+          <button onClick={onClose} className="icon-btn"><X size={15} /></button>
         </div>
 
-        {/* Tab bar */}
+        {/* Tabs */}
         <div className="flex border-b border-zinc-700">
           {(['env', 'csv'] as Tab[]).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                tab === t
-                  ? 'bg-zinc-700 text-zinc-100'
-                  : 'text-zinc-400 hover:text-zinc-100'
-              }`}
+              className={`px-4 py-2.5 text-sm font-medium transition-[background-color,color] duration-150
+                ${tab === t ? 'text-zinc-100 border-b-2 border-blue-500' : 'text-zinc-500 hover:text-zinc-300'}`}
             >
-              {t === 'env' ? 'ENV File' : 'CSV File'}
+              {t === 'env' ? '.env file' : 'CSV file'}
             </button>
           ))}
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto flex-1 p-4 flex flex-col gap-4">
+        <div className="overflow-y-auto flex-1 p-5 flex flex-col gap-4">
           {tab === 'env' && (
             <>
-              <button
-                onClick={handlePickEnv}
-                className="self-start text-sm px-3 py-1.5 rounded bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
-              >
-                Choose .env file
-              </button>
-
+              <button onClick={handlePickEnv} className="btn-subtle btn-sm w-fit">Choose .env file</button>
               {envEntries.length > 0 && (
                 <>
-                  <div className="text-xs text-zinc-400">{envEntries.length} entries found</div>
-                  <div className="rounded border border-zinc-700 overflow-hidden">
+                  <p className="text-xs text-zinc-500">{envEntries.length} entries found</p>
+                  <div className="rounded-md border border-zinc-700 overflow-hidden">
                     {envEntries.map((e, i) => (
-                      <div key={i} className="flex justify-between px-3 py-1.5 text-sm even:bg-zinc-700/30">
+                      <div key={i} className="flex justify-between px-3 py-1.5 even:bg-zinc-700/20">
                         <span className="text-xs text-zinc-300 font-mono">{e.label}</span>
-                        <span className="text-xs text-zinc-400 font-mono">••••••••</span>
+                        <span className="text-xs text-zinc-600 font-mono">••••••••</span>
                       </div>
                     ))}
                   </div>
-
                   <div className="flex items-center gap-3">
-                    <label className="text-sm text-zinc-300 shrink-0">Destination bucket</label>
-                    <select
-                      value={envBucketId}
-                      onChange={e => setEnvBucketId(e.target.value)}
-                      className="flex-1 bg-zinc-700 border border-zinc-600 rounded text-sm text-zinc-100 px-2 py-1"
-                    >
-                      {buckets.map(b => (
-                        <option key={b.id} value={b.id}>{b.name}</option>
-                      ))}
+                    <label className="text-sm text-zinc-400 flex-shrink-0">Destination bucket</label>
+                    <select value={envBucketId} onChange={e => setEnvBucketId(e.target.value)} className={colSelect}>
+                      {buckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                     </select>
                   </div>
-
-                  <button
-                    onClick={handleImportEnv}
-                    className="self-start text-sm px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white"
-                  >
-                    Import
+                  <button onClick={handleImportEnv} className="btn-primary btn-sm w-fit">
+                    Import {envEntries.length} entries
                   </button>
                 </>
               )}
@@ -223,130 +162,71 @@ export default function ImportModal({ onClose }: Props) {
 
           {tab === 'csv' && (
             <>
-              <button
-                onClick={handlePickCsv}
-                className="self-start text-sm px-3 py-1.5 rounded bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
-              >
-                Choose CSV file
-              </button>
-
+              <button onClick={handlePickCsv} className="btn-subtle btn-sm w-fit">Choose CSV file</button>
               {csvResult && (
                 <>
-                  <div className="text-xs text-zinc-400">{csvResult.total_rows} total rows</div>
-
-                  {/* Preview table */}
-                  <div className="overflow-x-auto rounded border border-zinc-700">
+                  <p className="text-xs text-zinc-500">{csvResult.total_rows} rows detected</p>
+                  {/* Preview */}
+                  <div className="overflow-x-auto rounded-md border border-zinc-700">
                     <table className="text-xs font-mono w-full border-collapse">
                       <thead>
-                        <tr>
-                          {csvResult.headers.map(h => (
-                            <th key={h} className="border border-zinc-600 px-2 py-1 text-zinc-300 bg-zinc-700/50 text-left">
-                              {h}
-                            </th>
-                          ))}
-                        </tr>
+                        <tr>{csvResult.headers.map(h => (
+                          <th key={h} className="border border-zinc-700 px-2 py-1.5 text-zinc-400 bg-zinc-700/40 text-left font-medium">{h}</th>
+                        ))}</tr>
                       </thead>
-                      <tbody>
-                        {csvResult.preview_rows.map((row, i) => (
-                          <tr key={i}>
-                            {row.map((cell, j) => (
-                              <td key={j} className="border border-zinc-600 px-2 py-1 text-zinc-400">
-                                {cell}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
+                      <tbody>{csvResult.preview_rows.map((row, i) => (
+                        <tr key={i}>{row.map((cell, j) => (
+                          <td key={j} className="border border-zinc-700 px-2 py-1 text-zinc-500">{cell}</td>
+                        ))}</tr>
+                      ))}</tbody>
                     </table>
                   </div>
-
                   {/* Column mapping */}
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                      <label className="text-sm text-zinc-300 w-40 shrink-0">Label column <span className="text-zinc-500">(required)</span></label>
-                      <select
-                        value={csvLabelCol}
-                        onChange={e => setCsvLabelCol(e.target.value)}
-                        className="flex-1 bg-zinc-700 border border-zinc-600 rounded text-sm text-zinc-100 px-2 py-1"
-                      >
-                        <option value="">— select —</option>
-                        {csvResult.headers.map(h => <option key={h} value={h}>{h}</option>)}
-                      </select>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <label className="text-sm text-zinc-300 w-40 shrink-0">Value/Password <span className="text-zinc-500">(required)</span></label>
-                      <select
-                        value={csvValueCol}
-                        onChange={e => setCsvValueCol(e.target.value)}
-                        className="flex-1 bg-zinc-700 border border-zinc-600 rounded text-sm text-zinc-100 px-2 py-1"
-                      >
-                        <option value="">— select —</option>
-                        {csvResult.headers.map(h => <option key={h} value={h}>{h}</option>)}
-                      </select>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <label className="text-sm text-zinc-300 w-40 shrink-0">Username <span className="text-zinc-500">(optional)</span></label>
-                      <select
-                        value={csvUsernameCol}
-                        onChange={e => setCsvUsernameCol(e.target.value)}
-                        className="flex-1 bg-zinc-700 border border-zinc-600 rounded text-sm text-zinc-100 px-2 py-1"
-                      >
-                        <option value="">— none —</option>
-                        {csvResult.headers.map(h => <option key={h} value={h}>{h}</option>)}
-                      </select>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <label className="text-sm text-zinc-300 w-40 shrink-0">Notes <span className="text-zinc-500">(optional)</span></label>
-                      <select
-                        value={csvNotesCol}
-                        onChange={e => setCsvNotesCol(e.target.value)}
-                        className="flex-1 bg-zinc-700 border border-zinc-600 rounded text-sm text-zinc-100 px-2 py-1"
-                      >
-                        <option value="">— none —</option>
-                        {csvResult.headers.map(h => <option key={h} value={h}>{h}</option>)}
-                      </select>
-                    </div>
+                  <div className="grid grid-cols-[160px_1fr] gap-x-3 gap-y-2.5 items-center">
+                    {[
+                      { label: 'Label column', required: true, value: csvLabelCol, set: setCsvLabelCol, none: false },
+                      { label: 'Value / Password', required: true, value: csvValueCol, set: setCsvValueCol, none: false },
+                      { label: 'Username', required: false, value: csvUsernameCol, set: setCsvUsernameCol, none: true },
+                      { label: 'Notes', required: false, value: csvNotesCol, set: setCsvNotesCol, none: true },
+                    ].map(col => (
+                      <>
+                        <label key={col.label + 'l'} className="text-sm text-zinc-400">
+                          {col.label}{col.required && <span className="text-zinc-600 ml-1">(required)</span>}
+                        </label>
+                        <select key={col.label + 's'} value={col.value} onChange={e => col.set(e.target.value)} className={colSelect}>
+                          {col.none && <option value="">— none —</option>}
+                          {!col.none && <option value="">— select —</option>}
+                          {csvResult.headers.map(h => <option key={h} value={h}>{h}</option>)}
+                        </select>
+                      </>
+                    ))}
                   </div>
-
-                  {/* Entry type toggle */}
+                  {/* Entry type */}
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-zinc-300">Entry type</span>
-                    <div className="flex rounded overflow-hidden border border-zinc-600">
+                    <span className="text-sm text-zinc-400">Import as</span>
+                    <div className="flex gap-1 p-1 bg-zinc-700/40 rounded-md">
                       {(['api_key', 'account'] as EntryType[]).map(t => (
-                        <button
-                          key={t}
-                          onClick={() => setCsvEntryType(t)}
-                          className={`px-3 py-1 text-sm transition-colors ${
-                            csvEntryType === t
-                              ? 'bg-zinc-600 text-zinc-100'
-                              : 'text-zinc-400 hover:text-zinc-100'
-                          }`}
-                        >
+                        <button key={t} onClick={() => setCsvEntryType(t)}
+                          className={`text-xs px-3 py-1.5 rounded transition-[background-color,color] duration-150
+                            ${csvEntryType === t ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-500 hover:text-zinc-300'}`}>
                           {t === 'api_key' ? 'API Key' : 'Account'}
                         </button>
                       ))}
                     </div>
                   </div>
-
+                  {/* Destination */}
                   <div className="flex items-center gap-3">
-                    <label className="text-sm text-zinc-300 shrink-0">Destination bucket</label>
-                    <select
-                      value={csvBucketId}
-                      onChange={e => setCsvBucketId(e.target.value)}
-                      className="flex-1 bg-zinc-700 border border-zinc-600 rounded text-sm text-zinc-100 px-2 py-1"
-                    >
-                      {buckets.map(b => (
-                        <option key={b.id} value={b.id}>{b.name}</option>
-                      ))}
+                    <label className="text-sm text-zinc-400 flex-shrink-0">Destination bucket</label>
+                    <select value={csvBucketId} onChange={e => setCsvBucketId(e.target.value)} className={colSelect}>
+                      {buckets.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
                     </select>
                   </div>
-
                   <button
                     onClick={handleImportCsv}
                     disabled={!csvLabelCol || !csvValueCol}
-                    className="self-start text-sm px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-primary btn-sm w-fit"
                   >
-                    Import
+                    Import rows
                   </button>
                 </>
               )}

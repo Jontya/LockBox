@@ -57,7 +57,6 @@ export default function AddEditEntryModal({ entry, bucketId, onClose }: Props) {
     setIsLoading(true);
     try {
       const newData = { ...vaultData, buckets: vaultData.buckets.map(b => ({ ...b, entries: [...b.entries] })) };
-
       if (isEdit) {
         for (const bucket of newData.buckets) {
           const idx = bucket.entries.findIndex(e => e.id === entry!.id);
@@ -76,7 +75,6 @@ export default function AddEditEntryModal({ entry, bucketId, onClose }: Props) {
         const targetBucket = newData.buckets.find(b => b.id === selectedBucketId);
         if (targetBucket) targetBucket.entries.push(newEntry);
       }
-
       setVaultData(newData);
       await tauriApi.saveVaultData(newData);
       onClose();
@@ -87,25 +85,22 @@ export default function AddEditEntryModal({ entry, bucketId, onClose }: Props) {
     }
   };
 
-  const fieldClass = (err?: string) =>
-    `w-full bg-zinc-700 border ${err ? 'border-red-500' : 'border-zinc-600'} rounded-md px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-500`;
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div ref={cardRef} className="bg-zinc-800 rounded-lg p-6 max-w-md w-full shadow-xl">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-lg font-medium text-zinc-100">{isEdit ? 'Edit Entry' : 'Add Entry'}</span>
-          <button className="text-zinc-400 hover:text-zinc-100" onClick={onClose}>
-            <X className="w-5 h-5" />
-          </button>
+    <div className="modal-backdrop">
+      <div ref={cardRef} className="modal-box max-w-md">
+        <div className="flex items-center justify-between mb-5">
+          <span className="text-base font-semibold text-zinc-100">{isEdit ? 'Edit Entry' : 'New Entry'}</span>
+          <button className="icon-btn" onClick={onClose} aria-label="Close"><X size={15} /></button>
         </div>
 
+        {/* Type toggle — add mode only */}
         {!isEdit && (
-          <div className="flex gap-1 mb-4 bg-zinc-700/40 rounded-md p-1">
+          <div className="flex gap-1 mb-4 p-1 bg-zinc-700/40 rounded-md">
             {(['api_key', 'account'] as VaultEntryType[]).map(t => (
               <button
                 key={t}
-                className={`flex-1 text-sm px-3 py-1.5 rounded ${type === t ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-400 hover:text-zinc-100'}`}
+                className={`flex-1 text-sm py-1.5 rounded transition-[background-color,color] duration-150
+                  ${type === t ? 'bg-zinc-700 text-zinc-100' : 'text-zinc-500 hover:text-zinc-300'}`}
                 onClick={() => setType(t)}
               >
                 {t === 'api_key' ? 'API Key' : 'Account'}
@@ -114,88 +109,66 @@ export default function AddEditEntryModal({ entry, bucketId, onClose }: Props) {
           </div>
         )}
 
-        <div className="mb-3">
-          <label className="block text-xs text-zinc-500 mb-1">Label</label>
-          <input className={fieldClass(errors.label)} value={label} onChange={e => setLabel(e.target.value)} placeholder="My API Key" />
-          {errors.label && <p className="text-xs text-red-400 mt-1">{errors.label}</p>}
-        </div>
-
-        {type === 'api_key' ? (
-          <div className="mb-3">
-            <label className="block text-xs text-zinc-500 mb-1">Value</label>
-            <input className={fieldClass(errors.value)} value={value} onChange={e => setValue(e.target.value)} placeholder="sk-..." />
-            {errors.value && <p className="text-xs text-red-400 mt-1">{errors.value}</p>}
+        <div className="flex flex-col gap-3">
+          <div>
+            <label className="text-xs font-medium text-zinc-500 mb-1 block">Label</label>
+            <input className={`field ${errors.label ? 'field-error' : ''}`} value={label} onChange={e => setLabel(e.target.value)} placeholder="My API Key" />
+            {errors.label && <p className="text-xs text-red-400 mt-1">{errors.label}</p>}
           </div>
-        ) : (
-          <>
-            <div className="mb-3">
-              <label className="block text-xs text-zinc-500 mb-1">Username</label>
-              <input className={fieldClass(errors.username)} value={username} onChange={e => setUsername(e.target.value)} placeholder="user@example.com" />
-              {errors.username && <p className="text-xs text-red-400 mt-1">{errors.username}</p>}
+
+          {type === 'api_key' ? (
+            <div>
+              <label className="text-xs font-medium text-zinc-500 mb-1 block">Value</label>
+              <input className={`field ${errors.value ? 'field-error' : ''}`} value={value} onChange={e => setValue(e.target.value)} placeholder="sk-…" />
+              {errors.value && <p className="text-xs text-red-400 mt-1">{errors.value}</p>}
             </div>
-            <div className="mb-3">
-              <label className="block text-xs text-zinc-500 mb-1">Password</label>
-              <div className="relative">
-                <input
-                  className={fieldClass(errors.password) + ' pr-10'}
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-100"
-                  onClick={() => setShowPassword(v => !v)}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+          ) : (
+            <>
+              <div>
+                <label className="text-xs font-medium text-zinc-500 mb-1 block">Username</label>
+                <input className={`field ${errors.username ? 'field-error' : ''}`} value={username} onChange={e => setUsername(e.target.value)} placeholder="user@example.com" />
+                {errors.username && <p className="text-xs text-red-400 mt-1">{errors.username}</p>}
               </div>
-              {errors.password && <p className="text-xs text-red-400 mt-1">{errors.password}</p>}
-            </div>
-          </>
-        )}
+              <div>
+                <label className="text-xs font-medium text-zinc-500 mb-1 block">Password</label>
+                <div className="relative">
+                  <input
+                    className={`field pr-10 ${errors.password ? 'field-error' : ''}`}
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                  />
+                  <button type="button" tabIndex={-1} className="absolute right-2 top-1/2 -translate-y-1/2 icon-btn w-6 h-6" onClick={() => setShowPassword(v => !v)}>
+                    {showPassword ? <EyeOff size={13} /> : <Eye size={13} />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-xs text-red-400 mt-1">{errors.password}</p>}
+              </div>
+            </>
+          )}
 
-        <div className="mb-3">
-          <label className="block text-xs text-zinc-500 mb-1">Notes <span className="text-zinc-600">(optional)</span></label>
-          <textarea
-            className={fieldClass()}
-            rows={3}
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            placeholder="Optional notes..."
-          />
+          <div>
+            <label className="text-xs font-medium text-zinc-500 mb-1 block">Notes <span className="text-zinc-700">(optional)</span></label>
+            <textarea className="field" rows={3} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional notes…" />
+          </div>
+
+          {!isEdit && (
+            <div>
+              <label className="text-xs font-medium text-zinc-500 mb-1 block">Bucket</label>
+              <select className="field" value={selectedBucketId} onChange={e => setSelectedBucketId(e.target.value)}>
+                {(vaultData?.buckets ?? []).map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
-        {!isEdit && (
-          <div className="mb-4">
-            <label className="block text-xs text-zinc-500 mb-1">Bucket</label>
-            <select
-              className={fieldClass()}
-              value={selectedBucketId}
-              onChange={e => setSelectedBucketId(e.target.value)}
-            >
-              {(vaultData?.buckets ?? []).map(b => (
-                <option key={b.id} value={b.id}>{b.name}</option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <div className="flex gap-2 mt-2">
-          <button
-            className="flex-1 bg-zinc-700 hover:bg-zinc-600 text-zinc-100 text-sm px-4 py-2 rounded-md"
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
-          <button
-            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-2 rounded-md disabled:opacity-50"
-            onClick={handleSubmit}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Saving...' : (isEdit ? 'Save' : 'Add')}
+        <div className="flex gap-2 mt-5">
+          <button className="btn-ghost flex-1" onClick={onClose} disabled={isLoading}>Cancel</button>
+          <button className="btn-primary flex-1" onClick={handleSubmit} disabled={isLoading}>
+            {isLoading ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Entry'}
           </button>
         </div>
       </div>

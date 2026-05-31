@@ -4,16 +4,14 @@ import toast from 'react-hot-toast';
 import { tauriApi } from '../../lib/tauri';
 import { useFocusTrap } from '../../lib/useFocusTrap';
 
-interface Props {
-  onClose: () => void;
-}
+interface Props { onClose: () => void; }
 
-function strengthScore(password: string): number {
+function strengthScore(pw: string): number {
   let score = 0;
-  if (password.length >= 8) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
   return score;
 }
 
@@ -27,7 +25,6 @@ export default function ChangePasswordModal({ onClose }: Props) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   useFocusTrap(cardRef);
-
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
@@ -53,68 +50,41 @@ export default function ChangePasswordModal({ onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center">
-      <div ref={cardRef} className="bg-zinc-900 border border-zinc-700 rounded-lg w-80 p-4 flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-zinc-100">Change Password</span>
-          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-100">
-            <X size={16} />
-          </button>
+    <div className="modal-backdrop" style={{ zIndex: 60 }}>
+      <div ref={cardRef} className="modal-box max-w-sm">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-base font-semibold text-zinc-100">Change Password</span>
+          <button onClick={onClose} className="icon-btn"><X size={15} /></button>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="text-xs text-zinc-400">Current password</label>
-          <input
-            type="password"
-            value={current}
-            onChange={e => setCurrent(e.target.value)}
-            className="bg-zinc-800 border border-zinc-600 rounded text-sm text-zinc-100 px-2 py-1.5 outline-none focus:border-zinc-400"
-          />
+        <div className="flex flex-col gap-3">
+          <div>
+            <label className="text-xs font-medium text-zinc-500 mb-1 block">Current password</label>
+            <input type="password" value={current} onChange={e => setCurrent(e.target.value)} className="field" placeholder="••••••••" />
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-zinc-500 mb-1 block">New password</label>
+            <input type="password" value={newPass} onChange={e => setNewPass(e.target.value)} className="field" placeholder="••••••••" />
+            {newPass.length > 0 && (
+              <div className="flex gap-1 mt-1.5">
+                {[0, 1, 2, 3].map(i => (
+                  <div key={i} className={`h-1 flex-1 rounded-full transition-colors duration-300 ${i < score ? segmentColors[score - 1] : 'bg-zinc-700'}`} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-zinc-500 mb-1 block">Confirm new password</label>
+            <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} className="field" placeholder="••••••••" />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="text-xs text-zinc-400">New password</label>
-          <input
-            type="password"
-            value={newPass}
-            onChange={e => setNewPass(e.target.value)}
-            className="bg-zinc-800 border border-zinc-600 rounded text-sm text-zinc-100 px-2 py-1.5 outline-none focus:border-zinc-400"
-          />
-          {newPass.length > 0 && (
-            <div className="flex gap-1">
-              {[0, 1, 2, 3].map(i => (
-                <div
-                  key={i}
-                  className={`h-1 flex-1 rounded-full ${i < score ? segmentColors[score - 1] : 'bg-zinc-700'}`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label className="text-xs text-zinc-400">Confirm new password</label>
-          <input
-            type="password"
-            value={confirm}
-            onChange={e => setConfirm(e.target.value)}
-            className="bg-zinc-800 border border-zinc-600 rounded text-sm text-zinc-100 px-2 py-1.5 outline-none focus:border-zinc-400"
-          />
-        </div>
-
-        <div className="flex gap-2 justify-end mt-1">
-          <button
-            onClick={onClose}
-            className="text-sm px-3 py-1.5 rounded bg-zinc-700 hover:bg-zinc-600 text-zinc-100"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="text-sm px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white disabled:opacity-50"
-          >
-            {submitting ? 'Saving...' : 'Save'}
+        <div className="flex gap-2 justify-end mt-4">
+          <button onClick={onClose} className="btn-ghost btn-sm">Cancel</button>
+          <button onClick={handleSubmit} disabled={submitting} className="btn-primary btn-sm">
+            {submitting ? 'Saving…' : 'Change Password'}
           </button>
         </div>
       </div>

@@ -11,11 +11,14 @@ export default function SetupFlow() {
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-zinc-900">
-      <div className="bg-zinc-800 rounded-lg p-6 max-w-md w-full">
-        {step === 'welcome' && <WelcomeStep onNext={() => setStep('password')} />}
-        {step === 'password' && <CreatePasswordStep onNext={() => setStep('backup')} />}
-        {step === 'backup' && <BackupStep onNext={() => setStep('complete')} />}
-        {step === 'complete' && <CompleteStep />}
+      <div
+        className="bg-zinc-800 rounded-xl w-full max-w-md mx-4 p-7"
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.2)' }}
+      >
+        {step === 'welcome'   && <WelcomeStep onNext={() => setStep('password')} />}
+        {step === 'password'  && <CreatePasswordStep onNext={() => setStep('backup')} />}
+        {step === 'backup'    && <BackupStep onNext={() => setStep('complete')} />}
+        {step === 'complete'  && <CompleteStep />}
       </div>
     </div>
   );
