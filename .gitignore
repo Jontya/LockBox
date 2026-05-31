@@ -1,0 +1,41 @@
+# Tauri build outputs
+/src-tauri/target/
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+
+# Claude Code session files
+.claude/
+.claude_session/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/settings.json
+*.suo
+*.user
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test outputs
+/coverage/
+
+# Tauri generated
+/src-tauri/WixTools/
+/src-tauri/gen/
+
+# Docs (local only)
+docs/
