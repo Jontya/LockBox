@@ -18,6 +18,7 @@ export default function TopBar({ onSearchOpen, onSettingsOpen, onLock }: Props) 
     >
       {/* Drag region + label */}
       <div className="flex items-center gap-2 px-4 flex-1 min-w-0" data-tauri-drag-region>
+        <img src="/lockbox.svg" alt="" className="w-4 h-4 flex-shrink-0" draggable="false" data-tauri-drag-region />
         <span className="text-sm font-semibold text-zinc-100 tracking-tight" data-tauri-drag-region>
           LockBox
         </span>

@@ -10,9 +10,10 @@ export default function TitleBar() {
       data-tauri-drag-region
       onMouseDown={() => appWindow.startDragging()}
     >
-      <span className="text-xs font-semibold text-zinc-500 px-4 tracking-tight" data-tauri-drag-region>
-        LockBox
-      </span>
+      <div className="flex items-center gap-2 px-4" data-tauri-drag-region>
+        <img src="/lockbox.svg" alt="" className="w-3.5 h-3.5 flex-shrink-0" draggable="false" data-tauri-drag-region />
+        <span className="text-xs font-semibold text-zinc-500 tracking-tight" data-tauri-drag-region>LockBox</span>
+      </div>
       <div className="flex items-center">
         <button
           onMouseDown={e => e.stopPropagation()} onClick={() => appWindow.minimize()}
