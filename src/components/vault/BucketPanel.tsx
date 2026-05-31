@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronRight, Plus } from 'lucide-react';
+import { ChevronRight, Lock, Plus, Settings } from 'lucide-react';
 import { getBucketColor } from '../../lib/bucketColors';
 import { useVaultStore } from '../../store/vaultStore';
 import type { Bucket } from '../../types/vault';
@@ -9,7 +9,12 @@ import EditBucketModal from './EditBucketModal';
 
 interface ContextMenuState { bucketId: string; x: number; y: number; }
 
-export default function BucketPanel() {
+interface Props {
+  onSettingsOpen: () => void;
+  onLock: () => void;
+}
+
+export default function BucketPanel({ onSettingsOpen, onLock }: Props) {
   const { vaultData, selectedBucketId, setSelectedBucketId } = useVaultStore();
   const [showCreate, setShowCreate] = useState(false);
   const [editBucket, setEditBucket] = useState<Bucket | null>(null);
@@ -135,16 +140,38 @@ export default function BucketPanel() {
         )}
       </div>
 
-      <div className="px-3 py-3 border-t border-zinc-800">
-        <button
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-300 w-full px-2 py-1.5 rounded
-                     transition-[color] duration-150
-                     focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
-        >
-          <Plus size={13} />
-          New Bucket
-        </button>
+      <div className="border-t border-zinc-800">
+        <div className="flex items-center px-3 pt-2 gap-1">
+          <button
+            onClick={onSettingsOpen}
+            className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-300 flex-1 px-2 py-1.5 rounded
+                       transition-[color] duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+            aria-label="Settings"
+          >
+            <Settings size={13} />
+            Settings
+          </button>
+          <button
+            onClick={onLock}
+            className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-300 flex-1 px-2 py-1.5 rounded
+                       transition-[color] duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+            aria-label="Lock vault"
+          >
+            <Lock size={13} />
+            Lock
+          </button>
+        </div>
+        <div className="px-3 pb-3 pt-1">
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-2 text-xs text-zinc-500 hover:text-zinc-300 w-full px-2 py-1.5 rounded
+                       transition-[color] duration-150
+                       focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500"
+          >
+            <Plus size={13} />
+            New Bucket
+          </button>
+        </div>
       </div>
 
       {contextMenu && contextBucket && (

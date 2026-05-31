@@ -5,13 +5,11 @@ import BucketPanel from './BucketPanel';
 import EntryList from './EntryList';
 import { useVaultStore } from '../../store/vaultStore';
 import { tauriApi } from '../../lib/tauri';
-import GlobalSearchOverlay from './GlobalSearchOverlay';
 import SettingsPanel from '../settings/SettingsPanel';
 
 export default function VaultLayout() {
   const { config, setAppState, setVaultData, setWasAutoLocked } = useVaultStore();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [showSearch, setShowSearch] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   const autoLockMs = (config?.auto_lock_minutes ?? 5) * 60 * 1000;
@@ -64,19 +62,17 @@ export default function VaultLayout() {
   return (
     <div className="flex flex-col h-screen bg-zinc-900">
       <TopBar
-        onSearchOpen={() => setShowSearch(true)}
         onSettingsOpen={() => setShowSettings(true)}
         onLock={() => handleLock(false)}
       />
       <div className="flex flex-1 overflow-hidden">
         <div className="w-60 flex-shrink-0">
-          <BucketPanel />
+          <BucketPanel onSettingsOpen={() => setShowSettings(true)} onLock={() => handleLock(false)} />
         </div>
         <div className="flex flex-1 flex-col bg-zinc-900 overflow-hidden">
           <EntryList onAddEntry={() => { /* Step 10 will wire this */ }} />
         </div>
       </div>
-      {showSearch && <GlobalSearchOverlay onClose={() => setShowSearch(false)} />}
       {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
     </div>
   );

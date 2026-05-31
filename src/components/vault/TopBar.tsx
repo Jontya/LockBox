@@ -1,15 +1,14 @@
-import { Search, Settings, Lock, Minus, Square, X } from 'lucide-react';
+import { Settings, Lock, Minus, Square, X } from 'lucide-react';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 
 interface Props {
-  onSearchOpen: () => void;
   onSettingsOpen: () => void;
   onLock: () => void;
 }
 
 const appWindow = getCurrentWebviewWindow();
 
-export default function TopBar({ onSearchOpen, onSettingsOpen, onLock }: Props) {
+export default function TopBar({ onSettingsOpen, onLock }: Props) {
   return (
     <div
       className="flex items-center h-10 bg-zinc-900 border-b border-zinc-800 flex-shrink-0 select-none"
@@ -23,22 +22,6 @@ export default function TopBar({ onSearchOpen, onSettingsOpen, onLock }: Props) 
           LockBox
         </span>
       </div>
-
-      {/* Vault controls — not drag region */}
-      <div className="flex items-center gap-0.5 px-1">
-        <button onClick={onSearchOpen} className="icon-btn" aria-label="Search">
-          <Search size={14} />
-        </button>
-        <button onClick={onSettingsOpen} className="icon-btn" aria-label="Settings">
-          <Settings size={14} />
-        </button>
-        <button onClick={onLock} className="icon-btn" aria-label="Lock vault">
-          <Lock size={14} />
-        </button>
-      </div>
-
-      {/* Separator */}
-      <div className="w-px h-5 bg-zinc-800 mx-1" />
 
       {/* Window controls */}
       <div className="flex items-center">
