@@ -1,12 +1,15 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import TopBar from './TopBar';
+import BucketPanel from './BucketPanel';
 import { useVaultStore } from '../../store/vaultStore';
 import { tauriApi } from '../../lib/tauri';
 
 export default function VaultLayout() {
   const { config, setAppState, setVaultData, setWasAutoLocked } = useVaultStore();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const autoLockMs = (config?.auto_lock_minutes ?? 5) * 60 * 1000;
 
@@ -58,18 +61,20 @@ export default function VaultLayout() {
   return (
     <div className="flex flex-col h-screen bg-zinc-900">
       <TopBar
-        onSearchOpen={() => {}}
-        onSettingsOpen={() => {}}
+        onSearchOpen={() => { setShowSearch(true); console.log('search open'); }}
+        onSettingsOpen={() => { setShowSettings(true); console.log('settings open'); }}
         onLock={() => handleLock(false)}
       />
       <div className="flex flex-1 overflow-hidden">
-        <div className="w-60 flex-shrink-0 bg-zinc-900 border-r border-zinc-800 flex items-center justify-center">
-          <span className="text-zinc-500 text-sm">Bucket panel (Step 8)</span>
+        <div className="w-60 flex-shrink-0">
+          <BucketPanel />
         </div>
         <div className="flex flex-1 flex-col bg-zinc-900 items-center justify-center">
           <span className="text-zinc-500 text-sm">Entry list (Step 9)</span>
         </div>
       </div>
+      {showSearch && null}
+      {showSettings && null}
     </div>
   );
 }
