@@ -14,6 +14,7 @@ export default function TopBar({ onSearchOpen, onSettingsOpen, onLock }: Props) 
     <div
       className="flex items-center h-10 bg-zinc-900 border-b border-zinc-800 flex-shrink-0 select-none"
       data-tauri-drag-region
+      onMouseDown={() => appWindow.startDragging()}
     >
       {/* Drag region + label */}
       <div className="flex items-center gap-2 px-4 flex-1 min-w-0" data-tauri-drag-region>

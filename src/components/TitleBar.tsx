@@ -8,6 +8,7 @@ export default function TitleBar() {
     <div
       className="flex items-center justify-between h-9 bg-zinc-900 flex-shrink-0 select-none"
       data-tauri-drag-region
+      onMouseDown={() => appWindow.startDragging()}
     >
       <span className="text-xs font-semibold text-zinc-500 px-4 tracking-tight" data-tauri-drag-region>
         LockBox
