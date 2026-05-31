@@ -31,6 +31,7 @@ pub enum VaultEntry {
     },
 }
 
+#[allow(dead_code)]
 impl VaultEntry {
     pub fn id(&self) -> &str {
         match self {
@@ -66,6 +67,7 @@ impl VaultData {
 
 // ── Vault file on-disk representation ────────────────────────────────────────
 
+#[allow(dead_code)]
 pub struct VaultFileContents {
     pub version: u8,
     pub m_cost_exp: u8,
@@ -164,10 +166,12 @@ pub fn read_vault_file(path: &Path) -> Result<VaultFileContents, String> {
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
+#[allow(dead_code)]
 pub fn new_uuid() -> String {
     Uuid::new_v4().to_string()
 }
 
+#[allow(dead_code)]
 pub fn now_iso() -> String {
     use std::time::{SystemTime, UNIX_EPOCH};
     let secs = SystemTime::now()

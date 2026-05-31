@@ -237,7 +237,7 @@ pub fn save_vault_data(
 
 #[tauri::command]
 pub fn get_config(
-    app: tauri::AppHandle,
+    _app: tauri::AppHandle,
     config_state: State<ConfigState>,
 ) -> Result<AppConfig, String> {
     let cfg = config_state.0.lock().map_err(|_| "Lock poisoned".to_string())?;

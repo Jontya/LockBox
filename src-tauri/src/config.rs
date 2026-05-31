@@ -24,6 +24,7 @@ impl Default for AppConfig {
     }
 }
 
+#[allow(dead_code)]
 pub fn load_config(path: &Path) -> AppConfig {
     std::fs::read_to_string(path)
         .ok()
