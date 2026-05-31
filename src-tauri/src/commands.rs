@@ -1,3 +1,4 @@
+use tauri::Manager;
 use crate::config::{self, AppConfig};
 use crate::state::{ConfigState, VaultState};
 use crate::vault::{self, VaultData};
