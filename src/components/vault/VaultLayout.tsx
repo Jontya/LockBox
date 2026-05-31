@@ -6,6 +6,7 @@ import EntryList from './EntryList';
 import { useVaultStore } from '../../store/vaultStore';
 import { tauriApi } from '../../lib/tauri';
 import GlobalSearchOverlay from './GlobalSearchOverlay';
+import SettingsPanel from '../settings/SettingsPanel';
 
 export default function VaultLayout() {
   const { config, setAppState, setVaultData, setWasAutoLocked } = useVaultStore();
@@ -64,7 +65,7 @@ export default function VaultLayout() {
     <div className="flex flex-col h-screen bg-zinc-900">
       <TopBar
         onSearchOpen={() => setShowSearch(true)}
-        onSettingsOpen={() => { setShowSettings(true); console.log('settings open'); }}
+        onSettingsOpen={() => setShowSettings(true)}
         onLock={() => handleLock(false)}
       />
       <div className="flex flex-1 overflow-hidden">
@@ -76,7 +77,7 @@ export default function VaultLayout() {
         </div>
       </div>
       {showSearch && <GlobalSearchOverlay onClose={() => setShowSearch(false)} />}
-      {showSettings && null}
+      {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
     </div>
   );
 }
