@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { useVaultStore } from '../../store/vaultStore';
 import type { VaultEntry } from '../../types/vault';
 import EntryCard from './EntryCard';
+import { getBucketColor } from '../../lib/bucketColors';
 import EntryDetailModal from './EntryDetailModal';
 import AddEditEntryModal from './AddEditEntryModal';
 import ConfirmDeleteEntryModal from './ConfirmDeleteEntryModal';
@@ -53,8 +54,9 @@ export default function EntryList({ onAddEntry: _onAddEntry }: Props) {
     if (selectedBucket) {
       const entries = filterEntries(selectedBucket.entries);
       if (entries.length === 0) return <EmptyState message={search ? 'No entries match your search.' : 'No entries. Add one above.'} />;
+      const color = getBucketColor(selectedBucket.color);
       return entries.map(entry => (
-        <EntryCard key={entry.id} entry={entry} onClick={() => setSelectedEntry(entry)} />
+        <EntryCard key={entry.id} entry={entry} onClick={() => setSelectedEntry(entry)} bucketColor={color} />
       ));
     }
 
@@ -70,7 +72,7 @@ export default function EntryList({ onAddEntry: _onAddEntry }: Props) {
           {entries.length === 0
             ? <EmptyState message={search ? 'No entries match.' : 'No entries yet.'} />
             : entries.map(entry => (
-                <EntryCard key={entry.id} entry={entry} onClick={() => setSelectedEntry(entry)} />
+                <EntryCard key={entry.id} entry={entry} onClick={() => setSelectedEntry(entry)} bucketColor={getBucketColor(bucket.color)} />
               ))}
         </div>
       );

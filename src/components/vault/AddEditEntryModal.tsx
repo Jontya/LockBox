@@ -112,7 +112,7 @@ export default function AddEditEntryModal({ entry, bucketId, onClose }: Props) {
         <div className="flex flex-col gap-3">
           <div>
             <label className="text-xs font-medium text-zinc-500 mb-1 block">Label</label>
-            <input className={`field ${errors.label ? 'field-error' : ''}`} value={label} onChange={e => setLabel(e.target.value)} placeholder="My API Key" />
+            <input className={`field ${errors.label ? 'field-error' : ''}`} value={label} onChange={e => setLabel(e.target.value)} placeholder={type === 'api_key' ? 'My API Key' : 'My Account'} />
             {errors.label && <p className="text-xs text-red-400 mt-1">{errors.label}</p>}
           </div>
 
