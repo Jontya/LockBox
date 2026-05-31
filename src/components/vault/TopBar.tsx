@@ -1,14 +1,9 @@
-import { Settings, Lock, Minus, Square, X } from 'lucide-react';
+import { Minus, Square, X } from 'lucide-react';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
-
-interface Props {
-  onSettingsOpen: () => void;
-  onLock: () => void;
-}
 
 const appWindow = getCurrentWebviewWindow();
 
-export default function TopBar({ onSettingsOpen, onLock }: Props) {
+export default function TopBar() {
   return (
     <div
       className="flex items-center h-10 bg-zinc-900 border-b border-zinc-800 flex-shrink-0 select-none"

@@ -61,10 +61,7 @@ export default function VaultLayout() {
 
   return (
     <div className="flex flex-col h-screen bg-zinc-900">
-      <TopBar
-        onSettingsOpen={() => setShowSettings(true)}
-        onLock={() => handleLock(false)}
-      />
+      <TopBar />
       <div className="flex flex-1 overflow-hidden">
         <div className="w-60 flex-shrink-0">
           <BucketPanel onSettingsOpen={() => setShowSettings(true)} onLock={() => handleLock(false)} />
