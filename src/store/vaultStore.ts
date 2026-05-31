@@ -8,11 +8,13 @@ interface VaultStore {
   vaultData: VaultData | null;
   config: AppConfig | null;
   selectedBucketId: string | null;
+  wasAutoLocked: boolean;
 
   setAppState: (state: AppState) => void;
   setVaultData: (data: VaultData | null) => void;
   setConfig: (config: AppConfig | null) => void;
   setSelectedBucketId: (id: string | null) => void;
+  setWasAutoLocked: (v: boolean) => void;
 }
 
 export const useVaultStore = create<VaultStore>((set) => ({
@@ -20,9 +22,11 @@ export const useVaultStore = create<VaultStore>((set) => ({
   vaultData: null,
   config: null,
   selectedBucketId: null,
+  wasAutoLocked: false,
 
   setAppState: (appState) => set({ appState }),
   setVaultData: (vaultData) => set({ vaultData }),
   setConfig: (config) => set({ config }),
   setSelectedBucketId: (selectedBucketId) => set({ selectedBucketId }),
+  setWasAutoLocked: (wasAutoLocked) => set({ wasAutoLocked }),
 }));
