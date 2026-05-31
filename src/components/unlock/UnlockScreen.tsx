@@ -60,7 +60,7 @@ export default function UnlockScreen({ wasAutoLocked = false }: Props) {
   const disabled = cooldown > 0 || loading;
 
   return (
-    <div className="flex h-screen items-center justify-center bg-zinc-900">
+    <div className="flex h-full items-center justify-center bg-zinc-900">
       <div
         className="w-full max-w-sm mx-4 bg-zinc-800 rounded-xl p-8"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.2)' }}

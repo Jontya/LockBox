@@ -10,7 +10,7 @@ export default function SetupFlow() {
   const [step, setStep] = useState<Step>('welcome');
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-zinc-900">
+    <div className="flex h-full w-full items-center justify-center bg-zinc-900 overflow-y-auto py-6">
       <div
         className="bg-zinc-800 rounded-xl w-full max-w-md mx-4 p-7"
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.2)' }}
